@@ -47,6 +47,7 @@ app.get("/mahasiswa",(req,res)=>{
 
  })
 
+//  manmabah data atau menginput data
  app.post("/mahasiswa",(req,res)=>{
   // mengambil data dari request body
   const {nim,nama,alamat,jenis_kelamin,tanggal_lahir} = req.body;
@@ -63,23 +64,16 @@ app.get("/mahasiswa",(req,res)=>{
     response(400,null,"nim harus angka",res);
   }
 
-  // 🔍 CEK DULU APAKAH NIM SUDAH ADA
-  const checkSql = "SELECT * FROM mahasiswa WHERE nim = ?"
   
-  db.query(checkSql, [nim], (err, results) => {
-    if (err) {
-      return response(500, null, err.message, res)
-    }
-
-    if (results.length > 0) {
-      return response(400, null, "NIM sudah terdaftar", res)
-    }})
-
   
   // insert data
   const sql = `INSERT INTO mahasiswa (nim,nama,alamat,jenis_kelamin,tanggal_lahir) VALUE (?,?,?,?,?)`;
   
   db.query(sql,[nim,nama,alamat,jenis_kelamin,tanggal_lahir],(err,field)=>{
+    if (err.code === "ER_DUP_ENTRY") {
+        return response(400, null, `NIM ${nim} sudah terdaftar`, res)
+      }
+
     if(err){
       return response(400,null,err.message,res);
     }
@@ -89,7 +83,42 @@ app.get("/mahasiswa",(req,res)=>{
 
  })
 
-app.put("/",(req,res)=>{})
+//  EDIT ATAU UPDATE DATA
+app.put("/mahasiswa/:nim",(req,res)=>{
+// ======= ALUR PUT ======
+// 1. ambil NIM dari parameter dengan  req.params
+const nim = req.params.nim;
+// 2. ambil DATA dari req.body
+const { nama, alamat, jenis_kelamin, tanggal_lahir} = req.body
+// 3. Validasi
+      // nim harus angka
+      if(isNaN(nim)){
+        return response(400,null,"NIM harus angka", res)
+      }
+      // tidak boleh ada yang kosong
+      if(!nama || !alamat || !jenis_kelamin || !tanggal_lahir) {
+        return response(400,null,"DATA TIDAK BOLEH KOSONG",res)
+      }
+// 4. jalankan query UPDATE
+const sql = "UPDATE mahasiswa SET nama = ?, alamat = ?,  jenis_kelamin = ?, tanggal_lahir = ? WHERE nim = ? "
+
+// 5. cek apakah data ada atau tidak
+
+db.query(sql,[nama,alamat,jenis_kelamin,tanggal_lahir,nim],(err,field)=>{
+   if (err) {
+    return response(500, null, err.message, res)
+  }
+
+  if (field.affectedRows === 0) {
+    return response(404, null, "DATA TIDAK DITEMUKAN", res)
+  }
+
+  response(200,field,"DATA BERHASIL DIUBAH",res)
+})
+
+})
+
+
 
 app.delete("/",(req,res)=>{})
 
