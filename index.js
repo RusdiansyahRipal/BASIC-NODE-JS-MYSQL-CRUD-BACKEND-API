@@ -119,8 +119,46 @@ db.query(sql,[nama,alamat,jenis_kelamin,tanggal_lahir,nim],(err,field)=>{
 })
 
 
+// DELETE
 
-app.delete("/",(req,res)=>{})
+app.delete("/mahasiswa/:nim",(req,res)=>{
+  //ALUR DELETE
+  //1. AMBIL DATA DARI req.params.nim
+  const nim = req.params.nim;
+
+  //2. VALIDASI (nim harus anggka)
+  if(isNaN(nim)){
+    return response(404,null,"NIM HARUS ANGKA",res)
+  }
+
+  //3. QUERY DELETE
+  const sql = `DELETE FROM mahasiswa WHERE nim= ?`
+  //4.EKSESKUSI QUERY
+  db.query(sql,[nim],(err,field)=>{
+    //cek error
+    if(err){
+      return response(400,null,err.message,res)
+    }
+
+    //cek apakah data ada
+    if(field.affectedRows === 0){
+      return response(400,null,"DATA TIDAK DITEMUKAN",res)
+    }
+    //sukses
+    response(400,field,"DATA BERHASIL DIHAPUS",res)
+  })
+  /*
+  🎯 Kesimpulan
+
+DELETE itu:
+
+ambil parameter
+validasi
+query
+cek affectedRows
+kirim response 
+  */
+})
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

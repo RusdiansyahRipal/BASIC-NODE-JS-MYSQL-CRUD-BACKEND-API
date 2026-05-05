@@ -63,7 +63,7 @@ npm install
 4. Jalankan server
 
 ```
-node index.js
+node index.js / npm run api-service
 ```
 
 ---
@@ -85,13 +85,13 @@ POST /mahasiswa
 ### 🔹 PUT - Update data
 
 ```
-PUT /mahasiswa/:id
+PUT /mahasiswa/:nim
 ```
 
 ### 🔹 DELETE - Hapus data
 
 ```
-DELETE /mahasiswa/:id
+DELETE /mahasiswa/:nim
 ```
 
 ---
